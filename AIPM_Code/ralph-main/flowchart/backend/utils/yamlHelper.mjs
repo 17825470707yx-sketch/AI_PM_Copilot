@@ -4,7 +4,7 @@ import yaml from 'js-yaml';
 import { getPrdBaseDir } from './pathHelper.mjs';
 
 const PRD_BASE_DIR = getPrdBaseDir();
-const TARGET_IDS = ['nomenclature', 'target_users', 'user_scenarios', 'problem_statement', 'repository_goal'];
+const TARGET_IDS = ['nomenclature', 'target_users', 'user_scenarios', 'problem_statement'];
 
 function parseVersion(versionStr) {
   const cleanStr = versionStr.replace(/^v/i, '');

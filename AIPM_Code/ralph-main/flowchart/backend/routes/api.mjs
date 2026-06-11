@@ -269,7 +269,10 @@ export async function Router(req, res) {
       const parsed = safeJsonParse(body) || {};
       const prdDraftSections = parsed.prdDraftSections || [];
 
-      const targetRepoPath = process.cwd();
+      // 强制写入 Conduit 实仓
+      const { CONDUIT_REPO_PATH } = await import('../controllers/codeGeneration.mjs');
+      const targetRepoPath = CONDUIT_REPO_PATH;
+      console.log(`[Implement Code] 目标仓库路径已锁定为 Conduit 实仓: ${targetRepoPath}`);
       const allFiles = await scanProjectFiles(targetRepoPath);
 
       const maxFilesToProcess = allFiles.slice(0, 10);
@@ -284,13 +287,14 @@ export async function Router(req, res) {
 你是一个高级前端研发工程师。现在有一个基于真实源码和最新 PRD 的需求需要实现。
 请阅读 PRD 内容和现有的代码上下文，决定如何修改代码。
 注意：你需要直接输出可以直接覆盖现有文件的【完整最新代码】。
+【重要规则】modifiedFiles 中的 path 字段只输出相对于 Conduit 项目根目录的相对路径（如 "frontend/src/routes/Home.jsx"），绝对不要写绝对路径。
 
 严格返回以下 JSON 格式：
 {
   "summary": "本次代码修改的简要总结",
   "modifiedFiles": [
     {
-      "path": "原文件的绝对路径（保持一致）",
+      "path": "相对于项目根目录的相对路径",
       "content": "修改后的该文件的完整源码（绝对不要省略部分代码）",
       "changeDescription": "简述做了什么改动"
     }
@@ -324,13 +328,18 @@ ${sourceCodeContext.join('\n\n---\n\n')}
       if (Array.isArray(structuredResult.modifiedFiles)) {
         for (const mod of structuredResult.modifiedFiles) {
           if (mod.path && mod.content) {
-            await writeFile(mod.path, mod.content, 'utf8');
+            // 自动拼接 Conduit 实仓的绝对路径，确保100%写入正确位置
+            const absoluteTargetPath = join(targetRepoPath, mod.path);
+            const parentDir = dirname(absoluteTargetPath);
+            await access(parentDir).catch(() => mkdir(parentDir, { recursive: true }));
+            await writeFile(absoluteTargetPath, mod.content, 'utf8');
             finalModifiedFiles.push({
               path: mod.path,
+              absolutePath: absoluteTargetPath,
               changeDescription: mod.changeDescription || '代码已更新',
               ok: true
             });
-            console.log(`✅ 已真实覆盖写入文件: ${mod.path}`);
+            console.log(`✅ 已真实覆盖写入文件: ${absoluteTargetPath}`);
           }
         }
       }

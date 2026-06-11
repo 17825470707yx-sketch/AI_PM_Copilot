@@ -17,11 +17,11 @@ export default defineConfig({
         target: PROXY_TARGET,
         changeOrigin: true,
         secure: false,
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log(`[Vite Proxy] 转发请求: ${req.method} ${req.url} -> ${PROXY_TARGET}${req.url}`);
-          });
-        },
+        configure: (proxy, _options) => {
+        proxy.on('proxyReq', (_proxyReq, req, _res) => {
+          console.log(`[Vite Proxy] 转发请求: ${req.method} ${req.url} -> ${PROXY_TARGET}${req.url}`);
+        });
+      },
       },
     },
   },

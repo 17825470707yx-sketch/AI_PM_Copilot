@@ -1,11 +1,17 @@
 import { readFile, writeFile, access, mkdir, readdir } from 'node:fs/promises';
 import { join, basename, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { findLatestPrdFile, scanProjectFiles } from '../services/fileSystem.mjs';
 import { getPrdBaseDir } from '../utils/pathHelper.mjs';
 import { parse } from 'yaml';
 import { callArkChat } from '../services/arkLlm.mjs';
 
-const CONDUIT_REPO_PATH = '/Users/qinzimai/Desktop/CHI27_AI_Project/AIPM_Code/conduit-realworld-example-app-main';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// 从当前文件位置向上追溯到 AIPM_Code 层级，然后进入 conduit-realworld-example-app-main
+// 当前文件路径: .../AIPM_Code/ralph-main/flowchart/backend/controllers/codeGeneration.mjs
+// 向上 5 层: controllers -> backend -> flowchart -> ralph-main -> AIPM_Code
+const CONDUIT_REPO_PATH = join(__dirname, '..', '..', '..', '..', '..', 'conduit-realworld-example-app-main');
 
 export async function readPrdContents(projectName) {
   const latestPrd = await findLatestPrdFile(projectName);
