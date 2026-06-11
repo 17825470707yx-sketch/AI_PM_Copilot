@@ -1,3 +1,4 @@
+<img width="2704" height="672" alt="Frame 1410125408" src="https://github.com/user-attachments/assets/3fac574c-d31c-4e84-a87b-9db38cd51dae" />
 # AI_PM_Copilot
 
 ## 1. 项目简介
